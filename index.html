@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>คำนวณภาษีเงินได้บุคคลธรรมดา</title>
+<style>
+:root{
+  --bg:#e8edf3; --paper:#ffffff; --ink:#14213d; --muted:#5b6678; --line:#cfd8e3;
+  --teal:#0b6e6e; --amber:#f2b134; --panel:#14213d; --panel2:#1f3159;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:1rem}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Noto Sans Thai","Sarabun","Leelawadee UI",Tahoma,system-ui,sans-serif;
+  line-height:1.65;font-size:16px}
+header{padding:2rem 1.25rem 1rem;max-width:1100px;margin:0 auto}
+h1{margin:0 0 .35rem;font-size:1.75rem;font-weight:700;line-height:1.3}
+header p{margin:0;color:var(--muted);max-width:60ch}
+.safe{display:inline-block;margin-top:.9rem;padding:.35rem .8rem;border:1.5px solid var(--teal);
+  color:var(--teal);border-radius:999px;font-size:.9rem;background:#fff}
+main{max-width:1100px;margin:0 auto;padding:0 1.25rem 3rem;display:grid;
+  grid-template-columns:minmax(0,1fr) 360px;gap:1.5rem;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+fieldset{border:1px solid var(--line);background:var(--paper);border-radius:10px;
+  padding:1rem 1.1rem 1.1rem;margin:0 0 1.1rem}
+legend{font-weight:700;font-size:1.05rem;padding:0 .4rem}
+.row{display:grid;grid-template-columns:1fr 150px;gap:.5rem .9rem;align-items:center;
+  padding:.5rem 0;border-top:1px dashed var(--line)}
+.row:first-of-type{border-top:0}
+.row label{display:block}
+.row small{display:block;color:var(--muted);font-size:.82rem;line-height:1.4}
+.ctl{display:flex;flex-direction:column;gap:.3rem}
+input[type=number],select{width:100%;padding:.5rem .6rem;border:1px solid #9fb0c4;border-radius:6px;
+  font:inherit;background:#fff;color:var(--ink);text-align:right}
+select{text-align:left}
+input[type=checkbox]{width:1.3rem;height:1.3rem;accent-color:var(--teal);justify-self:end}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+aside{position:sticky;top:1rem}
+@media(max-width:900px){aside{position:static}}
+.result{background:var(--panel);color:#fff;border-radius:12px;padding:1.4rem 1.3rem}
+.result h2{margin:0;font-size:1rem;font-weight:500;color:#c4d0e6}
+.big{font-size:2.6rem;font-weight:700;line-height:1.2;color:var(--amber);margin:.2rem 0 .1rem;word-break:break-all}
+.sub{color:#c4d0e6;font-size:.9rem;margin:0 0 1rem}
+dl{margin:0}
+dl div{display:flex;justify-content:space-between;gap:1rem;padding:.4rem 0;border-top:1px solid var(--panel2)}
+dt{color:#c4d0e6}
+dd{margin:0;font-weight:600;text-align:right}
+.verdict{margin-top:1rem;padding:.7rem .9rem;border-radius:8px;background:var(--panel2);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:.88rem;margin-top:1rem;color:#e6edf9}
+th,td{padding:.3rem .2rem;border-top:1px solid var(--panel2);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{color:#c4d0e6;font-weight:500}
+.note{font-size:.82rem;color:var(--muted);margin-top:1rem;line-height:1.55}
+.note b{color:var(--ink)}
+.warn{color:#c4d0e6;font-size:.82rem;margin:.9rem 0 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>คำนวณภาษีเงินได้บุคคลธรรมดา</h1>
+  <p>กรอกรายได้และค่าลดหย่อนของปีภาษีที่ต้องการ ระบบคำนวณทันทีตามอัตราก้าวหน้า ครอบคลุมเงินได้ทุกประเภทตามมาตรา 40(1)–(8)</p>
+  <span class="safe">คำนวณในเบราว์เซอร์ของคุณเท่านั้น ไม่ส่ง ไม่เก็บข้อมูลใด ๆ</span>
+</header>
+
+<main>
+  <form id="f" autocomplete="off" onsubmit="return false">
+    <fieldset id="inc"><legend>เงินได้ทั้งปี (บาท)</legend></fieldset>
+    <fieldset id="fam"><legend>ค่าลดหย่อนครอบครัว</legend></fieldset>
+    <fieldset id="ins"><legend>ประกัน กองทุน และอื่น ๆ (กรอกจำนวนเงินที่จ่ายจริง)</legend></fieldset>
+    <fieldset id="don"><legend>เงินบริจาค</legend></fieldset>
+    <fieldset id="wh"><legend>ภาษีที่ถูกหักไว้แล้ว</legend></fieldset>
+  </form>
+
+  <aside aria-live="polite">
+    <div class="result">
+      <h2>ภาษีที่ต้องเสียทั้งปี</h2>
+      <div class="big" id="tax">0</div>
+      <p class="sub" id="eff">อัตราภาษีที่แท้จริง 0%</p>
+      <dl>
+        <div><dt>เงินได้รวม</dt><dd id="r-gross">0</dd></div>
+        <div><dt>หักค่าใช้จ่าย</dt><dd id="r-exp">0</dd></div>
+        <div><dt>หักค่าลดหย่อน</dt><dd id="r-allow">0</dd></div>
+        <div><dt>หักเงินบริจาค</dt><dd id="r-don">0</dd></div>
+        <div><dt>เงินได้สุทธิ</dt><dd id="r-net">0</dd></div>
+        <div><dt>ภาษีวิธีปกติ</dt><dd id="r-normal">0</dd></div>
+        <div id="altRow" hidden><dt>ภาษีวิธีเหมา 0.5%</dt><dd id="r-alt">0</dd></div>
+        <div><dt>ภาษีที่หักไว้แล้ว</dt><dd id="r-wh">0</dd></div>
+      </dl>
+      <div class="verdict" id="verdict">—</div>
+      <table>
+        <thead><tr><th>ช่วงเงินได้สุทธิ</th><th>อัตรา</th><th>ภาษี</th></tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+      <p class="warn">เป็นการประมาณการเพื่อวางแผน ไม่ใช่การยื่นแบบอย่างเป็นทางการ</p>
+    </div>
+    <p class="note"><b>หมายเหตุ</b> ค่าใช้จ่ายคำนวณแบบหักเหมา ไม่รวมกรณีหักตามจริง และไม่รวมสิทธิพิเศษเฉพาะปี (เช่น มาตรการ e-Receipt, กองทุน Thai ESG) ตรวจสอบเงื่อนไขล่าสุดที่ rd.go.th ก่อนยื่นภาษีจริง</p>
+  </aside>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(s){return document.querySelector(s);};
+  var fmt = function(n){return Number(n).toLocaleString("th-TH",{maximumFractionDigits:2});};
+  var el = {};
+
+  function addRow(parent, id, title, hint, kind, opts){
+    var row = document.createElement("div"); row.className = "row";
+    var lab = document.createElement("label"); lab.setAttribute("for", id);
+    lab.appendChild(document.createTextNode(title));
+    if(hint){ var s = document.createElement("small"); s.textContent = hint; lab.appendChild(s); }
+    row.appendChild(lab);
+    var ctl = document.createElement("div"); ctl.className = "ctl";
+    var inp;
+    if(kind === "check"){
+      inp = document.createElement("input"); inp.type = "checkbox";
+    } else {
+      inp = document.createElement("input"); inp.type = "number";
+      inp.min = "0"; inp.step = "any"; inp.inputMode = "decimal"; inp.placeholder = "0";
+    }
+    inp.id = id; el[id] = inp; ctl.appendChild(inp);
+    if(opts){
+      var sel = document.createElement("select");
+      sel.id = id + "_r"; sel.setAttribute("aria-label", "ประเภทหรืออัตราหักค่าใช้จ่าย: " + title);
+      opts.forEach(function(o){
+        var op = document.createElement("option"); op.value = o[0]; op.textContent = o[1]; sel.appendChild(op);
+      });
+      el[id + "_r"] = sel; ctl.appendChild(sel);
+    }
+    row.appendChild(ctl); parent.appendChild(row);
+  }
+
+  var inc = $("#inc");
+  addRow(inc,"i1","เงินเดือน โบนัส ค่าจ้าง","มาตรา 40(1) หักเหมา 50% ไม่เกิน 100,000 (รวม 40(1)–(3))");
+  addRow(inc,"i2","ค่านายหน้า งานฟรีแลนซ์","มาตรา 40(2) หักเหมา 50% ไม่เกิน 100,000 (รวม 40(1)–(3))");
+  addRow(inc,"i3","ค่าลิขสิทธิ์ เงินปี ค่าสิทธิ","มาตรา 40(3) หักเหมา 50% ไม่เกิน 100,000 (รวม 40(1)–(3))");
+  addRow(inc,"i4","ดอกเบี้ย เงินปันผล ผลตอบแทนลงทุน","มาตรา 40(4) หักค่าใช้จ่ายไม่ได้");
+  addRow(inc,"i5","ค่าเช่าทรัพย์สิน","มาตรา 40(5) เลือกประเภททรัพย์สิน",null,
+    [["0.3","อาคาร/สิ่งปลูกสร้าง/ยานพาหนะ 30%"],["0.2","ที่ดินเกษตร 20%"],["0.15","ที่ดินอื่น 15%"],["0.1","อื่น ๆ 10%"]]);
+  addRow(inc,"i6","วิชาชีพอิสระ","มาตรา 40(6) เลือกประเภทวิชาชีพ",null,
+    [["0.3","กฎหมาย วิศวกร สถาปนิก บัญชี ศิลปะ 30%"],["0.6","การประกอบโรคศิลปะ 60%"]]);
+  addRow(inc,"i7","รับเหมา (ผู้รับเหมาจัดหาวัสดุ)","มาตรา 40(7) หักเหมา 60%");
+  addRow(inc,"i8","ธุรกิจ พาณิชย์ อุตสาหกรรม ขนส่ง อื่น ๆ","มาตรา 40(8) เลือกอัตราตามประเภทกิจการ",null,
+    [["0.6","60%"],["0.4","40%"],["0.3","30%"],["0.2","20%"]]);
+
+  var fam = $("#fam");
+  addRow(fam,"spouse","คู่สมรสไม่มีเงินได้","ลดหย่อน 60,000","check");
+  addRow(fam,"kid1","บุตร (คนแรก หรือเกิดก่อนปี 2561) จำนวนคน","คนละ 30,000");
+  addRow(fam,"kid2","บุตรคนที่ 2 ขึ้นไปที่เกิดตั้งแต่ปี 2561 จำนวนคน","คนละ 60,000");
+  addRow(fam,"par","บิดามารดา (อายุ 60+ รายได้ไม่เกิน 30,000) จำนวนคน","คนละ 30,000 สูงสุด 4 คน");
+  addRow(fam,"dis","ผู้พิการ/ทุพพลภาพที่อุปการะ จำนวนคน","คนละ 60,000");
+  addRow(fam,"pre","ค่าฝากครรภ์และคลอดบุตร","ตามจริง สูงสุด 60,000");
+  var ins = $("#ins");
+  addRow(ins,"ss","ประกันสังคม","สูงสุด 9,000");
+  addRow(ins,"life","เบี้ยประกันชีวิต","สูงสุด 100,000 (รวมประกันสุขภาพตนเองไม่เกิน 100,000)");
+  addRow(ins,"hlth","เบี้ยประกันสุขภาพตนเอง","สูงสุด 25,000");
+  addRow(ins,"phl","เบี้ยประกันสุขภาพบิดามารดา","สูงสุด 15,000");
+  addRow(ins,"pen","เบี้ยประกันชีวิตแบบบำนาญ","15% ของเงินได้ สูงสุด 200,000");
+  addRow(ins,"pvd","กองทุนสำรองเลี้ยงชีพ (PVD)","15% ของเงินเดือน สูงสุด 500,000");
+  addRow(ins,"rmf","กองทุน RMF","30% ของเงินได้ สูงสุด 500,000");
+  addRow(ins,"ssf","กองทุน SSF","30% ของเงินได้ สูงสุด 200,000");
+  addRow(ins,"nsf","กองทุนการออมแห่งชาติ (กอช.)","สูงสุด 30,000");
+  addRow(ins,"home","ดอกเบี้ยเงินกู้ซื้อที่อยู่อาศัย","สูงสุด 100,000");
+  var don = $("#don");
+  addRow(don,"dedu","บริจาคเพื่อการศึกษา กีฬา โรงพยาบาลรัฐ","หักได้ 2 เท่าของที่จ่ายจริง");
+  addRow(don,"dgen","บริจาคทั่วไป","หักได้ตามที่จ่ายจริง");
+  addRow($("#wh"),"wh","ภาษีที่ถูกหัก ณ ที่จ่ายตลอดปี","จากหนังสือรับรองการหักภาษี (50 ทวิ)");
+
+  var BR = [[150000,0],[150000,.05],[200000,.10],[250000,.15],[250000,.20],[1000000,.25],[3000000,.30],[Infinity,.35]];
+
+  function n(id){
+    var x = parseFloat(el[id].value);
+    return (isFinite(x) && x > 0) ? Math.min(x, 1e10) : 0;
+  }
+  function r(id){ return parseFloat(el[id + "_r"].value) || 0; }
+
+  function calc(){
+    var i1=n("i1"),i2=n("i2"),i3=n("i3"),i4=n("i4"),i5=n("i5"),i6=n("i6"),i7=n("i7"),i8=n("i8");
+    var gross = i1+i2+i3+i4+i5+i6+i7+i8;
+    var exp = Math.min(0.5*(i1+i2+i3),100000) + i5*r("i5") + i6*r("i6") + i7*0.6 + i8*r("i8");
+
+    var spouse = el.spouse.checked;
+    var life = Math.min(n("life"),100000), health = Math.min(n("hlth"),25000);
+    var retire = Math.min(
+      Math.min(n("pen"),0.15*gross,200000) + Math.min(n("pvd"),0.15*i1,500000) +
+      Math.min(n("rmf"),0.30*gross,500000) + Math.min(n("ssf"),0.30*gross,200000) +
+      Math.min(n("nsf"),30000), 500000);
+    var allow = 60000 + (spouse?60000:0) + Math.floor(n("kid1"))*30000 + Math.floor(n("kid2"))*60000 +
+      Math.min(Math.floor(n("par")),4)*30000 + Math.floor(n("dis"))*60000 + Math.min(n("pre"),60000) +
+      Math.min(n("ss"),9000) + Math.min(life+health,100000) + Math.min(n("phl"),15000) +
+      retire + Math.min(n("home"),100000);
+
+    var before = Math.max(0, gross - exp - allow);
+    var don = Math.min(2*n("dedu") + n("dgen"), 0.10*before);
+    var net = Math.max(0, before - don);
+
+    var tax = 0, left = net, lo = 0, rows = [];
+    BR.forEach(function(b){
+      var part = Math.min(left, b[0]); var t = part*b[1];
+      var hi = lo + b[0];
+      rows.push([b[0]===Infinity ? "เกิน "+fmt(lo) : fmt(lo)+" – "+fmt(hi), Math.round(b[1]*100)+"%", t, part>0]);
+      tax += t; left -= part; lo = hi;
+    });
+
+    var g28 = i2+i3+i4+i5+i6+i7+i8;
+    var alt = g28 > (spouse ? 220000 : 120000) ? g28*0.005 : 0;
+    var finalTax = Math.max(tax, alt);
+    var paid = n("wh");
+
+    $("#tax").textContent = fmt(Math.round(finalTax*100)/100);
+    $("#eff").textContent = "อัตราภาษีที่แท้จริง " + (gross>0 ? (finalTax/gross*100).toFixed(2) : "0") + "% ของเงินได้รวม";
+    $("#r-gross").textContent = fmt(gross);
+    $("#r-exp").textContent = fmt(exp);
+    $("#r-allow").textContent = fmt(allow);
+    $("#r-don").textContent = fmt(don);
+    $("#r-net").textContent = fmt(net);
+    $("#r-normal").textContent = fmt(Math.round(tax*100)/100);
+    $("#altRow").hidden = alt === 0;
+    $("#r-alt").textContent = fmt(Math.round(alt*100)/100);
+    $("#r-wh").textContent = fmt(paid);
+
+    var diff = Math.round((finalTax - paid)*100)/100, v = $("#verdict");
+    if(finalTax === 0 && paid === 0) v.textContent = "ไม่มีภาษีที่ต้องชำระ";
+    else if(diff > 0) v.textContent = "ต้องชำระเพิ่ม " + fmt(diff) + " บาท";
+    else if(diff < 0) v.textContent = "ขอคืนภาษีได้ " + fmt(-diff) + " บาท";
+    else v.textContent = "ชำระครบแล้ว ไม่ต้องจ่ายเพิ่ม";
+
+    var tb = $("#tb"); while(tb.firstChild) tb.removeChild(tb.firstChild);
+    rows.forEach(function(x){
+      if(!x[3]) return;
+      var tr = document.createElement("tr");
+      [x[0], x[1], fmt(Math.round(x[2]*100)/100)].forEach(function(c){
+        var td = document.createElement("td"); td.textContent = c; tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+  }
+
+  $("#f").addEventListener("input", calc);
+  $("#f").addEventListener("change", calc);
+  calc();
+})();
+</script>
+</body>
+</html>
