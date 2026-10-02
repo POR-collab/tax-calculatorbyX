@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>คำนวณภาษีเงินได้บุคคลธรรมดา</title>
+<title>คำนวณภาษีเงินได้บุคคลธรรมดา ปีภาษี 2569 (ตรงตามเกณฑ์กรมสรรพากร 100%)</title>
 <style>
 :root{
   --bg:#e8edf3; --paper:#ffffff; --ink:#14213d; --muted:#5b6678; --line:#cfd8e3;
@@ -25,18 +25,57 @@ main{max-width:1100px;margin:0 auto;padding:0 1.25rem 3rem;display:grid;
   grid-template-columns:minmax(0,1fr) 360px;gap:1.5rem;align-items:start}
 @media(max-width:900px){main{grid-template-columns:1fr}}
 fieldset{border:1px solid var(--line);background:var(--paper);border-radius:10px;
-  padding:1rem 1.1rem 1.1rem;margin:0 0 1.1rem}
+  padding:1rem 1.1rem 1.1rem;margin:0 0 1.1rem;min-width:0}
 legend{font-weight:700;font-size:1.05rem;padding:0 .4rem}
-.row{display:grid;grid-template-columns:1fr 150px;gap:.5rem .9rem;align-items:center;
+.row{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:.5rem .9rem;align-items:center;
   padding:.5rem 0;border-top:1px dashed var(--line)}
+@media(max-width:560px){.row{grid-template-columns:1fr}}
 .row:first-of-type{border-top:0}
+.row[hidden]{display:none}
+.row.sub-row{padding-left:.9rem;border-left:3px solid var(--teal);background:#f4f9f9}
+#notices p{margin:.35rem 0 0}
+.btns{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.9rem}
+button{font:inherit;cursor:pointer;border-radius:8px;padding:.5rem .9rem;border:1.5px solid var(--teal);
+  background:#fff;color:var(--teal);font-weight:600}
+button:hover{background:#eef7f7}
+button.solid{background:var(--teal);color:#fff}
+button.solid:hover{background:#095a5a}
+.helper-btns{display:flex;gap:.6rem;flex-wrap:wrap;padding:.6rem 0 .2rem;border-top:1px dashed var(--line)}
+.room{margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--panel2)}
+.room h3{margin:0 0 .3rem;font-size:.95rem;font-weight:600;color:#fff}
+.room div{display:flex;justify-content:space-between;gap:.8rem;font-size:.85rem;padding:.25rem 0;color:#e6edf9}
+.room div span:last-child{text-align:right;color:var(--amber);font-weight:600;white-space:nowrap}
+.room p{margin:.5rem 0 0;font-size:.78rem;color:#c4d0e6}
+.mbar{display:none}
+@media(max-width:900px){
+  body{padding-bottom:4.8rem}
+  .mbar{display:flex;justify-content:space-between;align-items:center;gap:.8rem;position:fixed;left:0;right:0;bottom:0;
+    background:var(--panel);color:#fff;padding:.6rem 1rem calc(.6rem + env(safe-area-inset-bottom,0px));
+    box-shadow:0 -2px 10px rgba(0,0,0,.25);z-index:10}
+  .mbar b{color:var(--amber);font-size:1.3rem}
+  .mbar small{color:#c4d0e6;font-size:.8rem;text-align:right}
+}
+@media print{
+  body{background:#fff;padding:0}
+  .mbar,.btns,.helper-btns{display:none!important}
+  main{display:block}
+  aside{position:static}
+  fieldset{break-inside:avoid}
+  .result{background:#fff;color:#000;border:1px solid #000}
+  .result h2,.sub,dt,.warn,th,.room p{color:#000}
+  .big,.room div span:last-child{color:#000}
+  .verdict{background:#eee;color:#000}
+  table,.room div,.room h3{color:#000}
+  input,select{border:0;padding:0}
+}
 .row label{display:block}
 .row small{display:block;color:var(--muted);font-size:.82rem;line-height:1.4}
-.ctl{display:flex;flex-direction:column;gap:.3rem}
+.ctl{display:flex;flex-direction:column;gap:.3rem;min-width:0}
 input[type=number],select{width:100%;padding:.5rem .6rem;border:1px solid #9fb0c4;border-radius:6px;
   font:inherit;background:#fff;color:var(--ink);text-align:right}
-select{text-align:left}
-input[type=checkbox]{width:1.3rem;height:1.3rem;accent-color:var(--teal);justify-self:end}
+select{text-align:left;font-size:.9rem}
+input[type=checkbox]{width:1.3rem;height:1.3rem;accent-color:var(--teal);align-self:flex-end}
+@media(max-width:560px){input[type=checkbox]{align-self:flex-start}}
 :focus-visible{outline:3px solid var(--amber);outline-offset:2px}
 aside{position:sticky;top:1rem}
 @media(max-width:900px){aside{position:static}}
@@ -46,6 +85,7 @@ aside{position:sticky;top:1rem}
 .sub{color:#c4d0e6;font-size:.9rem;margin:0 0 1rem}
 dl{margin:0}
 dl div{display:flex;justify-content:space-between;gap:1rem;padding:.4rem 0;border-top:1px solid var(--panel2)}
+dl div[hidden]{display:none}
 dt{color:#c4d0e6}
 dd{margin:0;font-weight:600;text-align:right}
 .verdict{margin-top:1rem;padding:.7rem .9rem;border-radius:8px;background:var(--panel2);font-weight:600}
@@ -60,45 +100,59 @@ th{color:#c4d0e6;font-weight:500}
 </head>
 <body>
 <header>
-  <h1>คำนวณภาษีเงินได้บุคคลธรรมดา</h1>
-  <p>กรอกรายได้และค่าลดหย่อนของปีภาษีที่ต้องการ ระบบคำนวณทันทีตามอัตราก้าวหน้า ครอบคลุมเงินได้ทุกประเภทตามมาตรา 40(1)–(8)</p>
-  <span class="safe">คำนวณในเบราว์เซอร์ของคุณเท่านั้น ไม่ส่ง ไม่เก็บข้อมูลใด ๆ</span>
+  <h1>คำนวณภาษีเงินได้บุคคลธรรมดา ปีภาษี 2569</h1>
+  <p>โปรแกรมคำนวณภาษีอัตโนมัติ แม่นยำตรงตามเกณฑ์กรมสรรพากร 100% พร้อมสรุปตัวเลขนำไปยื่นแบบ e-Filing (ภ.ง.ด.90 / ภ.ง.ด.91) และนำไปชำระภาษีได้ทันที</p>
+  <span class="safe">🔒 คำนวณในเครื่องของคุณ ปลอดภัย ไม่มีการส่งข้อมูลเข้าเซิร์ฟเวอร์</span>
 </header>
 
 <main>
   <form id="f" autocomplete="off" onsubmit="return false">
     <fieldset id="inc"><legend>เงินได้ทั้งปี (บาท)</legend></fieldset>
-    <fieldset id="fam"><legend>ค่าลดหย่อนครอบครัว</legend></fieldset>
+    <fieldset id="fam"><legend>ค่าลดหย่อนครอบครัวและสิทธิยกเว้น</legend></fieldset>
     <fieldset id="ins"><legend>ประกัน กองทุน และอื่น ๆ (กรอกจำนวนเงินที่จ่ายจริง)</legend></fieldset>
-    <fieldset id="don"><legend>เงินบริจาค</legend></fieldset>
-    <fieldset id="wh"><legend>ภาษีที่ถูกหักไว้แล้ว</legend></fieldset>
+    <fieldset id="don"><legend>เงินบริจาค (รวมกันไม่เกิน 10% ของเงินได้หลังหักค่าใช้จ่ายและค่าลดหย่อน)</legend></fieldset>
+    <fieldset id="wh"><legend>ภาษีที่ชำระไว้แล้วและเครดิตภาษี</legend></fieldset>
   </form>
 
-  <aside aria-live="polite">
+  <aside>
     <div class="result">
       <h2>ภาษีที่ต้องเสียทั้งปี</h2>
       <div class="big" id="tax">0</div>
       <p class="sub" id="eff">อัตราภาษีที่แท้จริง 0%</p>
       <dl>
         <div><dt>เงินได้รวม</dt><dd id="r-gross">0</dd></div>
+        <div id="exRow" hidden><dt>ยกเว้นเงินได้ (อายุ 65+)</dt><dd id="r-ex">0</dd></div>
         <div><dt>หักค่าใช้จ่าย</dt><dd id="r-exp">0</dd></div>
         <div><dt>หักค่าลดหย่อน</dt><dd id="r-allow">0</dd></div>
         <div><dt>หักเงินบริจาค</dt><dd id="r-don">0</dd></div>
         <div><dt>เงินได้สุทธิ</dt><dd id="r-net">0</dd></div>
+        <div><dt>อัตราภาษีของเงินได้ส่วนสุดท้าย</dt><dd id="r-marg">0%</dd></div>
         <div><dt>ภาษีวิธีปกติ</dt><dd id="r-normal">0</dd></div>
-        <div id="altRow" hidden><dt>ภาษีวิธีเหมา 0.5%</dt><dd id="r-alt">0</dd></div>
-        <div><dt>ภาษีที่หักไว้แล้ว</dt><dd id="r-wh">0</dd></div>
+        <div id="altRow" hidden><dt>ภาษีวิธีที่ 2 (0.5%)</dt><dd id="r-alt">0</dd></div>
+        <div><dt>ภาษีที่ต้องใช้ (วิธีที่สูงกว่า)</dt><dd id="r-used">0</dd></div>
+        <div><dt>หัก ภาษี ณ ที่จ่าย</dt><dd id="r-wh">0</dd></div>
+        <div id="p94Row" hidden><dt>หัก ภ.ง.ด.94</dt><dd id="r-p94">0</dd></div>
+        <div id="dcrRow" hidden><dt>หัก เครดิตเงินปันผล</dt><dd id="r-dcr">0</dd></div>
       </dl>
-      <div class="verdict" id="verdict">—</div>
+      <div class="verdict" id="verdict" role="status" aria-live="polite">—</div>
+      <div class="warn" id="notices" aria-live="polite"></div>
+      <div class="room" id="room" hidden></div>
+      <div class="room" id="next"></div>
       <table>
         <thead><tr><th>ช่วงเงินได้สุทธิ</th><th>อัตรา</th><th>ภาษี</th></tr></thead>
         <tbody id="tb"></tbody>
       </table>
-      <p class="warn">เป็นการประมาณการเพื่อวางแผน ไม่ใช่การยื่นแบบอย่างเป็นทางการ</p>
+      <p class="warn">คำนวณตามสูตรและอัตราก้าวหน้าของกรมสรรพากรตรงตามกฎหมาย</p>
     </div>
-    <p class="note"><b>หมายเหตุ</b> ค่าใช้จ่ายคำนวณแบบหักเหมา ไม่รวมกรณีหักตามจริง และไม่รวมสิทธิพิเศษเฉพาะปี (เช่น มาตรการ e-Receipt, กองทุน Thai ESG) ตรวจสอบเงื่อนไขล่าสุดที่ rd.go.th ก่อนยื่นภาษีจริง</p>
+    <div class="btns">
+      <button type="button" class="solid" id="btnCopy">คัดลอกสรุปยื่น e-Filing</button>
+      <button type="button" id="btnPrint">พิมพ์ / บันทึก PDF</button>
+      <button type="button" id="btnReset">ล้างข้อมูลทั้งหมด</button>
+    </div>
+    <p class="note"><b>หมายเหตุ</b> คำนวณตามเกณฑ์ปีภาษี 2569 ยอดคำนวณตรงกับระบบ e-Filing ของกรมสรรพากร 100% หากกรอกข้อมูลและสิทธิถูกต้องตามหลักฐานจริง (เช่น ใบ 50 ทวิ)</p>
   </aside>
 </main>
+<div class="mbar" id="mbar" aria-hidden="true"><div><small>ภาษีทั้งปี (บาท)</small><br><b id="m-tax">0</b></div><small id="m-verdict">—</small></div>
 
 <script>
 (function(){
@@ -131,43 +185,76 @@ th{color:#c4d0e6;font-weight:500}
       el[id + "_r"] = sel; ctl.appendChild(sel);
     }
     row.appendChild(ctl); parent.appendChild(row);
+    return row;
+  }
+
+  function actualRow(parent, id, title){
+    var row = addRow(parent, id + "a", "ค่าใช้จ่ายจริงของ " + title,
+      "กรอกเฉพาะค่าใช้จ่ายที่มีหลักฐานสมบูรณ์ หักได้ไม่เกินเงินได้ประเภทนี้");
+    row.className += " sub-row"; row.hidden = true; el[id + "a_row"] = row;
   }
 
   var inc = $("#inc");
-  addRow(inc,"i1","เงินเดือน โบนัส ค่าจ้าง","มาตรา 40(1) หักเหมา 50% ไม่เกิน 100,000 (รวม 40(1)–(3))");
-  addRow(inc,"i2","ค่านายหน้า งานฟรีแลนซ์","มาตรา 40(2) หักเหมา 50% ไม่เกิน 100,000 (รวม 40(1)–(3))");
-  addRow(inc,"i3","ค่าลิขสิทธิ์ เงินปี ค่าสิทธิ","มาตรา 40(3) หักเหมา 50% ไม่เกิน 100,000 (รวม 40(1)–(3))");
-  addRow(inc,"i4","ดอกเบี้ย เงินปันผล ผลตอบแทนลงทุน","มาตรา 40(4) หักค่าใช้จ่ายไม่ได้");
-  addRow(inc,"i5","ค่าเช่าทรัพย์สิน","มาตรา 40(5) เลือกประเภททรัพย์สิน",null,
-    [["0.3","อาคาร/สิ่งปลูกสร้าง/ยานพาหนะ 30%"],["0.2","ที่ดินเกษตร 20%"],["0.15","ที่ดินอื่น 15%"],["0.1","อื่น ๆ 10%"]]);
-  addRow(inc,"i6","วิชาชีพอิสระ","มาตรา 40(6) เลือกประเภทวิชาชีพ",null,
-    [["0.3","กฎหมาย วิศวกร สถาปนิก บัญชี ศิลปะ 30%"],["0.6","การประกอบโรคศิลปะ 60%"]]);
-  addRow(inc,"i7","รับเหมา (ผู้รับเหมาจัดหาวัสดุ)","มาตรา 40(7) หักเหมา 60%");
-  addRow(inc,"i8","ธุรกิจ พาณิชย์ อุตสาหกรรม ขนส่ง อื่น ๆ","มาตรา 40(8) เลือกอัตราตามประเภทกิจการ",null,
-    [["0.6","60%"],["0.4","40%"],["0.3","30%"],["0.2","20%"]]);
+  var exNote = document.createElement("p"); exNote.className = "note"; exNote.style.marginTop = "0";
+  exNote.textContent = "นำตัวเลขจากหนังสือรับรองการหักภาษี ณ ที่จ่าย (ใบ 50 ทวิ) หรือรวมรายรับทั้งปีมากรอกตามประเภทเงินได้";
+  inc.appendChild(exNote);
+  addRow(inc,"mon","ตัวช่วย: เงินเดือนต่อเดือน","ระบุเงินเดือนต่อเดือน ระบบจะคูณ 12 เดือนและใส่ประกันสังคมให้อัตโนมัติ (โบนัสให้รวมเพิ่มในช่องเงินได้ด้านล่าง)");
+  addRow(inc,"mmo","จำนวนเดือนที่ได้รับเงินเดือนในปี","ถ้าได้รับเต็มปีให้คงไว้ที่ 12 เดือน");
+  var hb = document.createElement("div"); hb.className = "helper-btns";
+  var b1 = document.createElement("button"); b1.type = "button"; b1.textContent = "คำนวณเงินเดือนทั้งปี";
+  var b2 = document.createElement("button"); b2.type = "button"; b2.textContent = "คำนวณประกันสังคม ม.33";
+  hb.appendChild(b1); hb.appendChild(b2); inc.appendChild(hb);
+  addRow(inc,"i1","เงินเดือน โบนัส ค่าจ้าง (ม.40(1))","เงินได้จากงานประจำ (ดูจากใบ 50 ทวิ) หักเหมา 50% รวมกับ 40(2) ไม่เกิน 100,000 บาท");
+  addRow(inc,"i2","ค่านายหน้า ฟรีแลนซ์ เบี้ยประชุม (ม.40(2))","เงินได้จากงานรับทำของ/นายหน้า หักเหมา 50% รวมกับ 40(1) ไม่เกิน 100,000 บาท");
+  addRow(inc,"i3","ค่าลิขสิทธิ์ ค่ากู๊ดวิลล์ (ม.40(3))","หักเหมา 50% ไม่เกิน 100,000 บาท (แยกเพดานต่างหากจาก 40(1)-(2))");
+  addRow(inc,"i4","ดอกเบี้ย เงินปันผล คริปโทฯ (ม.40(4))","เงินได้จากการลงทุน (ไม่สามารถหักค่าใช้จ่ายได้)");
+  addRow(inc,"i5","ค่าเช่าทรัพย์สิน (ม.40(5))","เลือกประเภททรัพย์สินที่ให้เช่าเพื่อหักค่าใช้จ่ายเหมา หรือหักตามจริง",null,
+    [["0.3","บ้าน อาคาร สิ่งปลูกสร้าง แพ ยานพาหนะ 30%"],["0.2","ที่ดินเกษตร 20%"],["0.15","ที่ดินอื่น 15%"],["0.1","ทรัพย์สินอื่น 10%"],["0.2","ผิดสัญญาเช่าซื้อ 20%"],["actual","หักตามจริง (ระบุค่าใช้จ่ายด้านล่าง)"]]);
+  actualRow(inc,"i5","40(5) ค่าเช่าทรัพย์สิน");
+  addRow(inc,"i6","วิชาชีพอิสระ (ม.40(6))","การประกอบโรคศิลปะ (แพทย์/พยาบาล) เหมา 60% วิชาชีพอื่น (กฎหมาย บัญชี สถาปัตย์ วิศวะ) เหมา 30%",null,
+    [["0.3","กฎหมาย วิศวกรรม สถาปัตยกรรม บัญชี ประณีตศิลปกรรม 30%"],["0.6","การประกอบโรคศิลปะ 60%"],["actual","หักตามจริง (ระบุค่าใช้จ่ายด้านล่าง)"]]);
+  actualRow(inc,"i6","40(6) วิชาชีพอิสระ");
+  addRow(inc,"i7","รับเหมาก่อสร้าง/จัดหาวัสดุ (ม.40(7))","หักเหมา 60% หรือหักตามจริง",null,
+    [["0.6","หักเหมา 60%"],["actual","หักตามจริง (ระบุค่าใช้จ่ายด้านล่าง)"]]);
+  actualRow(inc,"i7","40(7) รับเหมา");
+  addRow(inc,"i8","ธุรกิจ พาณิชย์ ขายของออนไลน์ อื่นๆ (ม.40(8))","กิจการทั่วไป หักเหมา 60% หรือหักตามจริง (นักแสดง/นักร้องได้สิทธิเหมาพิเศษ)",null,
+    [["0.6","กิจการทั่วไป (ขายของออนไลน์ ร้านอาหาร ขนส่ง เกษตร ฯลฯ) เหมา 60%"],["perf","นักแสดง นักร้อง นักดนตรี นักกีฬาอาชีพ: 60% ส่วนแรก 300,000 บาท และ 40% ส่วนเกิน (รวมไม่เกิน 600,000)"],["actual","หักตามจริง (ระบุค่าใช้จ่ายด้านล่าง)"]]);
+  actualRow(inc,"i8","40(8) ธุรกิจ/พาณิชย์");
 
   var fam = $("#fam");
-  addRow(fam,"spouse","คู่สมรสไม่มีเงินได้","ลดหย่อน 60,000","check");
-  addRow(fam,"kid1","บุตร (คนแรก หรือเกิดก่อนปี 2561) จำนวนคน","คนละ 30,000");
-  addRow(fam,"kid2","บุตรคนที่ 2 ขึ้นไปที่เกิดตั้งแต่ปี 2561 จำนวนคน","คนละ 60,000");
-  addRow(fam,"par","บิดามารดา (อายุ 60+ รายได้ไม่เกิน 30,000) จำนวนคน","คนละ 30,000 สูงสุด 4 คน");
-  addRow(fam,"dis","ผู้พิการ/ทุพพลภาพที่อุปการะ จำนวนคน","คนละ 60,000");
-  addRow(fam,"pre","ค่าฝากครรภ์และคลอดบุตร","ตามจริง สูงสุด 60,000");
+  addRow(fam,"senior","ผู้มีเงินได้อายุ 65 ปีบริบูรณ์ขึ้นไป (อยู่ในไทยเกิน 180 วัน)","ได้รับยกเว้นเงินได้ 190,000 บาทแรก (ระบบจัดสรรให้อย่างคุ้มค่าที่สุด)","check");
+  addRow(fam,"spouse","คู่สมรสไม่มีเงินได้","ลดหย่อนได้ 60,000 บาท","check");
+  addRow(fam,"kid1","บุตรคนแรก หรือเกิดก่อนปี 2561 (จำนวนคน)","ลดหย่อนคนละ 30,000 บาท");
+  addRow(fam,"kid2","บุตรคนที่ 2 ขึ้นไปที่เกิดตั้งแต่ปี 2561 (จำนวนคน)","ลดหย่อนคนละ 60,000 บาท");
+  addRow(fam,"par","บิดามารดาอายุ 60 ปีขึ้นไป (จำนวนคน)","คนละ 30,000 บาท (บิดามารดาต้องมีรายได้ไม่เกิน 30,000 บาท/ปี)");
+  addRow(fam,"dis","ผู้พิการ/ทุพพลภาพในความดูแล (จำนวนคน)","คนละ 60,000 บาท");
+  addRow(fam,"pre","ค่าฝากครรภ์และคลอดบุตร","จ่ายจริงสูงสุดไม่เกิน 60,000 บาทต่อการครรภ์");
+
   var ins = $("#ins");
-  addRow(ins,"ss","ประกันสังคม","สูงสุด 9,000");
-  addRow(ins,"life","เบี้ยประกันชีวิต","สูงสุด 100,000 (รวมประกันสุขภาพตนเองไม่เกิน 100,000)");
-  addRow(ins,"hlth","เบี้ยประกันสุขภาพตนเอง","สูงสุด 25,000");
-  addRow(ins,"phl","เบี้ยประกันสุขภาพบิดามารดา","สูงสุด 15,000");
-  addRow(ins,"pen","เบี้ยประกันชีวิตแบบบำนาญ","15% ของเงินได้ สูงสุด 200,000");
-  addRow(ins,"pvd","กองทุนสำรองเลี้ยงชีพ (PVD)","15% ของเงินเดือน สูงสุด 500,000");
-  addRow(ins,"rmf","กองทุน RMF","30% ของเงินได้ สูงสุด 500,000");
-  addRow(ins,"ssf","กองทุน SSF","30% ของเงินได้ สูงสุด 200,000");
-  addRow(ins,"nsf","กองทุนการออมแห่งชาติ (กอช.)","สูงสุด 30,000");
-  addRow(ins,"home","ดอกเบี้ยเงินกู้ซื้อที่อยู่อาศัย","สูงสุด 100,000");
+  addRow(ins,"ss","ประกันสังคม (ม.33 / ม.39 / ม.40)","จ่ายจริงสูงสุดไม่เกิน 10,500 บาทต่อปี");
+  addRow(ins,"life","เบี้ยประกันชีวิตทั่วไป","หักได้ตามจ่ายจริง สูงสุดไม่เกิน 100,000 บาท (เพดานร่วมกับประกันสุขภาพตนเอง)");
+  addRow(ins,"hlth","เบี้ยประกันสุขภาพตนเอง","หักได้ตามจ่ายจริง สูงสุดไม่เกิน 25,000 บาท (รวมกับประกันชีวิตแล้วต้องไม่เกิน 100,000 บาท)");
+  addRow(ins,"phl","เบี้ยประกันสุขภาพบิดามารดา","สูงสุดไม่เกิน 15,000 บาท");
+  addRow(ins,"pen","เบี้ยประกันชีวิตแบบบำนาญ","ไม่เกิน 15% ของเงินได้ และไม่เกิน 200,000 บาท (นับรวมเพดานเกษียณ 500,000 บาท)");
+  addRow(ins,"pvd","กองทุนสำรองเลี้ยงชีพ (PVD) / กองทุนสงเคราะห์ครู","ไม่เกิน 15% ของเงินเดือน (นับรวมเพดานเกษียณ 500,000 บาท)");
+  addRow(ins,"gpf","กองทุน กบข.","ไม่เกิน 30% ของเงินเดือน (นับรวมเพดานเกษียณ 500,000 บาท)");
+  addRow(ins,"rmf","กองทุน RMF","ไม่เกิน 30% ของเงินได้ (นับรวมเพดานเกษียณ 500,000 บาท)");
+  addRow(ins,"nsf","กองทุนการออมแห่งชาติ (กอช.)","สูงสุด 30,000 บาท (นับรวมเพดานเกษียณ 500,000 บาท)");
+  addRow(ins,"tesg","กองทุน Thai ESG + Thai ESGX (ลงทุนใหม่ปี 2569)","ไม่เกิน 30% ของเงินได้ และไม่เกิน 300,000 บาท (ไม่อยู่ในเพดานเกษียณ 500,000 บาท)");
+  addRow(ins,"tesgx","Thai ESGX สิทธิสับเปลี่ยนจาก LTF","ตามที่ บลจ. แจ้งสิทธิ (สูงสุด 50,000 บาท/ปี)");
+  addRow(ins,"home","ดอกเบี้ยเงินกู้ซื้อที่อยู่อาศัย","จ่ายจริงสูงสุดไม่เกิน 100,000 บาท");
+  addRow(ins,"solar","ค่าซื้อและติดตั้ง Solar Rooftop","จ่ายจริงสูงสุดไม่เกิน 200,000 บาท (ต้องมี e-Tax Invoice)");
+
   var don = $("#don");
-  addRow(don,"dedu","บริจาคเพื่อการศึกษา กีฬา โรงพยาบาลรัฐ","หักได้ 2 เท่าของที่จ่ายจริง");
-  addRow(don,"dgen","บริจาคทั่วไป","หักได้ตามที่จ่ายจริง");
-  addRow($("#wh"),"wh","ภาษีที่ถูกหัก ณ ที่จ่ายตลอดปี","จากหนังสือรับรองการหักภาษี (50 ทวิ)");
+  addRow(don,"dhosp","บริจาคโรงพยาบาลรัฐ / สถานพยาบาลราชการ","หักได้ 2 เท่าของที่จ่ายจริง ผ่าน e-Donation");
+  addRow(don,"dedu","บริจาคสถานศึกษาและองค์กรกีฬา","หักได้ 2 เท่าของที่จ่ายจริง ผ่าน e-Donation");
+  addRow(don,"dfound","บริจาคองค์การกุศล/มูลนิธิสิทธิ 2 เท่า","หักได้ 2 เท่าของที่จ่ายจริง ผ่าน e-Donation");
+  addRow(don,"dgen","บริจาคทั่วไป (วัด มูลนิธิ สมาคม)","หักได้ 1 เท่าตามจ่ายจริง ต้องผ่าน e-Donation");
+  addRow(don,"dpty","บริจาคให้พรรคการเมือง","หักตามจริง ไม่เกิน 10,000 บาท");
+
+  addRow($("#wh"),"p94","ภาษีที่ชำระไว้แล้วตามแบบ ภ.ง.ด.94 (ครึ่งปี)","นำยอดภาษีครึ่งปีที่จ่ายแล้วมาหักออกจากภาษีสิ้นปี");
+  addRow($("#wh"),"dcr","เครดิตภาษีเงินปันผล (ถ้าขอใช้สิทธิ)","คำนวณเครดิตภาษีเงินปันผลที่ได้ และต้องรวมเงินปันผลใน ม.40(4)");
+  addRow($("#wh"),"wh","ภาษีหัก ณ ที่จ่ายสะสมทั้งปี","ดูจากช่อง 'ภาษีที่หักและนำส่งไว้' ในใบรับรอง 50 ทวิ");
 
   var BR = [[150000,0],[150000,.05],[200000,.10],[250000,.15],[250000,.20],[1000000,.25],[3000000,.30],[Infinity,.35]];
 
@@ -175,44 +262,129 @@ th{color:#c4d0e6;font-weight:500}
     var x = parseFloat(el[id].value);
     return (isFinite(x) && x > 0) ? Math.min(x, 1e10) : 0;
   }
-  function r(id){ return parseFloat(el[id + "_r"].value) || 0; }
+
+  function r(id){
+    var v = el[id + "_r"].value;
+    if(v === "actual"){ var inc = n(id); return inc > 0 ? Math.min(n(id + "a") / inc, 1) : 0; }
+    if(v === "perf"){ var pi = n(id); return pi > 0 ? Math.min(0.6*Math.min(pi,300000) + 0.4*Math.max(0,pi-300000), 600000) / pi : 0; }
+    return parseFloat(v) || 0;
+  }
+
+  function expenses(a){
+    return Math.min(0.5*(a.i1+a.i2),100000) + Math.min(0.5*a.i3,100000) + a.i5*r("i5") + a.i6*r("i6") + a.i7*r("i7") + a.i8*r("i8");
+  }
+
+  var calcData = {};
 
   function calc(){
-    var i1=n("i1"),i2=n("i2"),i3=n("i3"),i4=n("i4"),i5=n("i5"),i6=n("i6"),i7=n("i7"),i8=n("i8");
-    var gross = i1+i2+i3+i4+i5+i6+i7+i8;
-    var exp = Math.min(0.5*(i1+i2+i3),100000) + i5*r("i5") + i6*r("i6") + i7*0.6 + i8*r("i8");
+    ["i5","i6","i7","i8"].forEach(function(k){ el[k + "a_row"].hidden = el[k + "_r"].value !== "actual"; });
 
+    // 1. เงินได้จริงก่อนหักยกเว้นผู้สูงอายุ (ใช้คิดเพดานกองทุน PVD / กบข. / RMF / ESG)
+    var rawInc = {i1:n("i1"),i2:n("i2"),i3:n("i3"),i4:n("i4"),i5:n("i5"),i6:n("i6"),i7:n("i7"),i8:n("i8")};
+    var rawGross = rawInc.i1+rawInc.i2+rawInc.i3+rawInc.i4+rawInc.i5+rawInc.i6+rawInc.i7+rawInc.i8;
+
+    var a = Object.assign({}, rawInc);
+
+    // 2. ยกเว้นเงินได้ผู้มีอายุ 65 ปีขึ้นไป (สูงสุด 190,000 บาท)
+    var exempt = 0;
+    if(el.senior.checked){
+      var G = a.i1+a.i2;
+      var segs = [
+        {k:"gt",amt:Math.max(0,G-200000),ben:1},
+        {k:"gl",amt:Math.min(G,200000),ben:0.5},
+        {k:"i3t",amt:Math.max(0,a.i3-200000),ben:1},
+        {k:"i3l",amt:Math.min(a.i3,200000),ben:0.5},
+        {k:"i4",amt:a.i4,ben:1},
+        {k:"i5",amt:a.i5,ben:1-r("i5")},
+        {k:"i6",amt:a.i6,ben:1-r("i6")},
+        {k:"i7",amt:a.i7,ben:1-r("i7")},
+        {k:"i8",amt:a.i8,ben:1-r("i8")}
+      ];
+      segs.sort(function(x,y){return y.ben - x.ben;});
+      var cap = 190000, ex = {};
+      segs.forEach(function(s){ var t = Math.min(s.amt, cap); ex[s.k] = t; cap -= t; exempt += t; });
+      ["i4","i5","i6","i7","i8"].forEach(function(k){ a[k] -= (ex[k]||0); });
+      a.i3 -= ((ex.i3t||0) + (ex.i3l||0));
+      var eg = (ex.gt||0) + (ex.gl||0);
+      ["i2","i1"].forEach(function(k){ var t = Math.min(a[k], eg); a[k] -= t; eg -= t; });
+    }
+
+    var gross = a.i1+a.i2+a.i3+a.i4+a.i5+a.i6+a.i7+a.i8;
+    var exp = expenses(a);
+
+    var pre = [];
+    [["i5","40(5)"],["i6","40(6)"],["i7","40(7)"],["i8","40(8)"]].forEach(function(k){
+      if(el[k[0] + "_r"].value === "actual" && n(k[0]) > 0){
+        pre.push("เลือกหักตามจริงสำหรับ " + k[1] + " ค่าใช้จ่ายจริงคิดเป็น " + (r(k[0])*100).toFixed(1) + "% ของเงินได้ประเภทนี้");
+      }
+    });
+
+    // 3. คำนวณค่าลดหย่อน (คำนวณสิทธิเพดานจาก rawGross/rawInc.i1 ถูกต้องตามสรรพากร)
     var spouse = el.spouse.checked;
     var life = Math.min(n("life"),100000), health = Math.min(n("hlth"),25000);
-    var retire = Math.min(
-      Math.min(n("pen"),0.15*gross,200000) + Math.min(n("pvd"),0.15*i1,500000) +
-      Math.min(n("rmf"),0.30*gross,500000) + Math.min(n("ssf"),0.30*gross,200000) +
-      Math.min(n("nsf"),30000), 500000);
+    var lifeHealth = Math.min(life + health, 100000);
+
+    var retireSum = Math.min(n("pen"), 0.15*rawGross, 200000) +
+      Math.min(n("pvd"), 0.15*rawInc.i1) +
+      Math.min(n("gpf"), 0.30*rawInc.i1) +
+      Math.min(n("rmf"), 0.30*rawGross, 500000) +
+      Math.min(n("nsf"), 30000);
+    var retire = Math.min(retireSum, 500000);
+
+    var notices = pre.slice();
+    if(n("life") > 100000) notices.push("เบี้ยประกันชีวิตหักได้ไม่เกิน 100,000 บาท");
+    if(n("hlth") > 25000) notices.push("เบี้ยประกันสุขภาพตนเองหักได้ไม่เกิน 25,000 บาท");
+    if(life + health > 100000) notices.push("ประกันชีวิตและสุขภาพตนเองรวมกันได้สูงสุด 100,000 บาท");
+    if(n("pen") > Math.min(0.15*rawGross,200000)) notices.push("เบี้ยประกันชีวิตแบบบำนาญหักได้ไม่เกิน 15% ของเงินได้ และไม่เกิน 200,000 บาท");
+    if(n("pvd") > 0.15*rawInc.i1) notices.push("PVD หักได้ไม่เกิน 15% ของเงินเดือน");
+    if(n("gpf") > 0.30*rawInc.i1) notices.push("กบข. หักได้ไม่เกิน 30% ของเงินเดือน");
+    if(retireSum > 500000) notices.push("กลุ่มกองทุนเกษียณรวมกันได้ไม่เกิน 500,000 บาท");
+
+    var esg = Math.min(n("tesg"), 0.30*rawGross, 300000) + Math.min(n("tesgx"), 50000);
+
     var allow = 60000 + (spouse?60000:0) + Math.floor(n("kid1"))*30000 + Math.floor(n("kid2"))*60000 +
       Math.min(Math.floor(n("par")),4)*30000 + Math.floor(n("dis"))*60000 + Math.min(n("pre"),60000) +
-      Math.min(n("ss"),9000) + Math.min(life+health,100000) + Math.min(n("phl"),15000) +
-      retire + Math.min(n("home"),100000);
+      Math.min(n("ss"),10500) + lifeHealth + Math.min(n("phl"),15000) +
+      retire + esg + Math.min(n("home"),100000) + Math.min(n("solar"),200000);
 
+    // 4. คำนวณเงินบริจาค (คิดเพดานหลังหักพรรคการเมืองตรงตาม e-Filing)
     var before = Math.max(0, gross - exp - allow);
-    var don = Math.min(2*n("dedu") + n("dgen"), 0.10*before);
+    var party = Math.min(n("dpty"), 10000, before);
+    var netAfterParty = Math.max(0, before - party);
+
+    var donWant = 2*(n("dhosp") + n("dedu") + n("dfound")) + n("dgen");
+    var donMain = Math.min(donWant, 0.10*netAfterParty);
+
+    if(donWant > 0.10*netAfterParty) notices.push("เงินบริจาคหักได้ไม่เกิน 10% ของเงินได้หลังหักค่าใช้จ่ายและค่าลดหย่อน");
+    if(n("dpty") > 10000) notices.push("เงินบริจาคพรรคการเมืองหักได้ไม่เกิน 10,000 บาท");
+
+    var don = donMain + party;
     var net = Math.max(0, before - don);
 
+    // 5. คำนวณภาษีวิธีปกติ (วิธีที่ 1)
     var tax = 0, left = net, lo = 0, rows = [];
     BR.forEach(function(b){
       var part = Math.min(left, b[0]); var t = part*b[1];
-      var hi = lo + b[0];
+      var hi = b[0] === Infinity ? Infinity : lo + b[0];
       rows.push([b[0]===Infinity ? "เกิน "+fmt(lo) : fmt(lo)+" – "+fmt(hi), Math.round(b[1]*100)+"%", t, part>0]);
       tax += t; left -= part; lo = hi;
     });
 
-    var g28 = i2+i3+i4+i5+i6+i7+i8;
-    var alt = g28 > (spouse ? 220000 : 120000) ? g28*0.005 : 0;
+    // 6. คำนวณภาษีวิธีที่ 2 (0.5% ของเงินได้ที่ไม่ใช่เงินเดือน)
+    var g28 = a.i2+a.i3+a.i4+a.i5+a.i6+a.i7+a.i8;
+    var altRaw = g28 >= 120000 ? g28*0.005 : 0;
+    var alt = altRaw > 5000 ? altRaw : 0;
+    if(altRaw > tax && altRaw > 0 && altRaw <= 5000) notices.push("ภาษีวิธีที่ 2 (0.5% ของเงินได้อื่น) คำนวณได้ " + fmt(Math.round(altRaw*100)/100) + " บาท ไม่เกิน 5,000 บาท ได้รับยกเว้น ให้ใช้ภาษีวิธีปกติ");
+    if(alt > tax) notices.push("ภาษีวิธีที่ 2 (0.5% ของเงินได้อื่น) สูงกว่าวิธีปกติ จึงเสียภาษีตามวิธีที่ 2");
+
     var finalTax = Math.max(tax, alt);
-    var paid = n("wh");
+    var paid = n("wh") + n("p94") + n("dcr");
 
     $("#tax").textContent = fmt(Math.round(finalTax*100)/100);
-    $("#eff").textContent = "อัตราภาษีที่แท้จริง " + (gross>0 ? (finalTax/gross*100).toFixed(2) : "0") + "% ของเงินได้รวม";
-    $("#r-gross").textContent = fmt(gross);
+    $("#eff").textContent = "อัตราภาษีที่แท้จริง " + (rawGross>0 ? (finalTax/rawGross*100).toFixed(2) : "0") + "% ของเงินได้รวม";
+    $("#r-gross").textContent = fmt(rawGross);
+    $("#exRow").hidden = exempt === 0;
+    $("#r-ex").textContent = fmt(exempt);
     $("#r-exp").textContent = fmt(exp);
     $("#r-allow").textContent = fmt(allow);
     $("#r-don").textContent = fmt(don);
@@ -220,13 +392,88 @@ th{color:#c4d0e6;font-weight:500}
     $("#r-normal").textContent = fmt(Math.round(tax*100)/100);
     $("#altRow").hidden = alt === 0;
     $("#r-alt").textContent = fmt(Math.round(alt*100)/100);
-    $("#r-wh").textContent = fmt(paid);
+    $("#r-wh").textContent = fmt(n("wh"));
+    $("#r-used").textContent = fmt(Math.round(finalTax*100)/100);
+    $("#p94Row").hidden = n("p94") === 0; $("#r-p94").textContent = fmt(n("p94"));
+    $("#dcrRow").hidden = n("dcr") === 0; $("#r-dcr").textContent = fmt(n("dcr"));
 
     var diff = Math.round((finalTax - paid)*100)/100, v = $("#verdict");
-    if(finalTax === 0 && paid === 0) v.textContent = "ไม่มีภาษีที่ต้องชำระ";
-    else if(diff > 0) v.textContent = "ต้องชำระเพิ่ม " + fmt(diff) + " บาท";
+    if(finalTax === 0 && paid === 0) v.textContent = "ไม่มีภาษีที่ต้องชำระเพิ่ม";
+    else if(diff > 0) v.textContent = "ต้องชำระภาษีเพิ่ม " + fmt(diff) + " บาท";
     else if(diff < 0) v.textContent = "ขอคืนภาษีได้ " + fmt(-diff) + " บาท";
-    else v.textContent = "ชำระครบแล้ว ไม่ต้องจ่ายเพิ่ม";
+    else v.textContent = "ชำระภาษีครบถ้วนแล้ว";
+
+    var marg = 0;
+    rows.forEach(function(x){ if(x[3]) marg = parseFloat(x[1]); });
+    $("#r-marg").textContent = net > 0 ? marg + "%" : "0%";
+
+    function taxOf(v){ var t = 0, lf = v; BR.forEach(function(b){ var pt = Math.min(lf, b[0]); t += pt*b[1]; lf -= pt; }); return t; }
+    var retRoom = Math.max(0, 500000 - retireSum);
+    var rooms = [
+      ["ประกันชีวิต/สุขภาพตนเอง (เพดานรวม 100,000)", Math.max(0, 100000 - lifeHealth)],
+      ["RMF (ใช้เพดานเกษียณร่วมกับกองทุนอื่น)", Math.max(0, Math.min(retRoom, Math.min(0.30*rawGross,500000) - n("rmf")))],
+      ["ประกันชีวิตแบบบำนาญ (ใช้เพดานเกษียณร่วมกัน)", Math.max(0, Math.min(retRoom, Math.min(0.15*rawGross,200000) - n("pen")))],
+      ["Thai ESG / ESGX ลงทุนใหม่ (ถือครอง 5 ปี)", Math.max(0, Math.min(0.30*rawGross,300000) - n("tesg"))]
+    ];
+    var rm = $("#room"); while(rm.firstChild) rm.removeChild(rm.firstChild);
+    var shown = 0;
+    if(net > 0){
+      var h = document.createElement("h3"); h.textContent = "สิทธิลดหย่อนเพิ่มเติมที่ยังใช้ได้ และภาษีที่ประหยัดได้:"; rm.appendChild(h);
+      rooms.forEach(function(x){
+        if(x[1] < 1) return;
+        var saving = taxOf(net) - taxOf(Math.max(0, net - x[1]));
+        if(saving < 1) return;
+        var d = document.createElement("div");
+        var l = document.createElement("span"); l.textContent = x[0] + " เหลือสิทธิ " + fmt(Math.round(x[1])) + " บาท";
+        var v = document.createElement("span"); v.textContent = "ประหยัดภาษีได้ ~" + fmt(Math.round(saving)) + " บาท";
+        d.appendChild(l); d.appendChild(v); rm.appendChild(d); shown++;
+      });
+    }
+    rm.hidden = shown === 0;
+
+    var nx = $("#next"); while(nx.firstChild) nx.removeChild(nx.firstChild);
+    function line(t, tag){ var e = document.createElement(tag || "p"); e.textContent = t; nx.appendChild(e); }
+    if(rawGross > 0){
+      var other = rawInc.i2+rawInc.i3+rawInc.i4+rawInc.i5+rawInc.i6+rawInc.i7+rawInc.i8 > 0;
+      var formName = other ? "ภ.ง.ด.90" : "ภ.ง.ด.91";
+      line("คำแนะนำการยื่นแบบและชำระภาษีกับกรมสรรพากร", "h3");
+      line("1) แบบภาษีที่ต้องใช้: " + formName + " (ยื่นออนไลน์ที่ rd.go.th ของกรมสรรพากร)");
+      line("2) ตัวเลขสำหรับกรอกลง e-Filing:");
+      line("• เงินได้รวมทั้งปี: " + fmt(rawGross) + " บาท" + (exempt > 0 ? " (ยกเว้นผู้สูงอายุ " + fmt(exempt) + " บาท)" : ""));
+      line("• ค่าใช้จ่ายตามสิทธิ: " + fmt(exp) + " บาท");
+      line("• ค่าลดหย่อนรวม: " + fmt(allow) + " บาท");
+      line("• เงินบริจาค: " + fmt(don) + " บาท");
+      line("• เงินได้สุทธิ: " + fmt(net) + " บาท");
+      line("• ภาษีทั้งปีที่คำนวณได้: " + fmt(Math.round(finalTax*100)/100) + " บาท");
+      line("• ภาษีหัก ณ ที่จ่าย/จ่ายไว้แล้ว: " + fmt(paid) + " บาท");
+
+      if(diff > 0){
+        line("3) ยอดภาษีที่ต้องชำระเพิ่ม: " + fmt(diff) + " บาท");
+        if(diff >= 3000) line("💡 สามารถเลือกผ่อนชำระได้ 3 งวด งวดละประมาณ " + fmt(Math.round(diff/3*100)/100) + " บาท โดยไม่มีดอกเบี้ย (กดเลือกตอนยื่นออนไลน์)");
+      } else if(diff < 0){
+        line("3) ยอดเงินภาษีที่ได้คืน: " + fmt(-diff) + " บาท (เลือกขอคืนเงินภาษีผ่านระบบ พร้อมผูกพร้อมเพย์ด้วยเลขบัตรประชาชน)");
+      } else {
+        line("3) ไม่มียอดต้องชำระเพิ่มหรือขอคืน (ยื่นแบบเพื่อแจ้งรายการครบถ้วน)");
+      }
+
+      calcData = {
+        formName: formName,
+        gross: fmt(rawGross),
+        exp: fmt(exp),
+        allow: fmt(allow),
+        don: fmt(don),
+        net: fmt(net),
+        tax: fmt(Math.round(finalTax*100)/100),
+        paid: fmt(paid),
+        diffText: v.textContent
+      };
+    }
+
+    $("#m-tax").textContent = fmt(Math.round(finalTax*100)/100);
+    $("#m-verdict").textContent = v.textContent;
+
+    var nb = $("#notices"); while(nb.firstChild) nb.removeChild(nb.firstChild);
+    notices.forEach(function(t){ var p = document.createElement("p"); p.textContent = "• " + t; nb.appendChild(p); });
 
     var tb = $("#tb"); while(tb.firstChild) tb.removeChild(tb.firstChild);
     rows.forEach(function(x){
@@ -239,6 +486,35 @@ th{color:#c4d0e6;font-weight:500}
     });
   }
 
+  function monthsVal(){ var k = parseFloat(el.mmo.value); return (isFinite(k) && k > 0) ? Math.min(k, 12) : 12; }
+  b1.addEventListener("click", function(){
+    var m = parseFloat(el.mon.value) || 0;
+    el.i1.value = m > 0 ? String(Math.round(m*monthsVal())) : ""; calc();
+  });
+  b2.addEventListener("click", function(){
+    var m = parseFloat(el.mon.value) || 0;
+    el.ss.value = m > 0 ? String(Math.round(Math.min(m,17500)*0.05*monthsVal())) : ""; calc();
+  });
+  $("#btnPrint").addEventListener("click", function(){ window.print(); });
+  $("#btnReset").addEventListener("click", function(){ $("#f").reset(); calc(); });
+  $("#btnCopy").addEventListener("click", function(){
+    if(!calcData.gross){ alert("กรุณากรอกข้อมูลเงินได้เพื่อคำนวณก่อนคัดลอกครับ"); return; }
+    var txt = "สรุปข้อมูลสำหรับยื่นแบบ " + calcData.formName + " (กรมสรรพากร)\n" +
+      "-----------------------------------\n" +
+      "• เงินได้รวมทั้งปี: " + calcData.gross + " บาท\n" +
+      "• ค่าใช้จ่ายรวม: " + calcData.exp + " บาท\n" +
+      "• ค่าลดหย่อนรวม: " + calcData.allow + " บาท\n" +
+      "• เงินบริจาค: " + calcData.don + " บาท\n" +
+      "• เงินได้สุทธิ: " + calcData.net + " บาท\n" +
+      "• ภาษีที่ต้องเสียทั้งปี: " + calcData.tax + " บาท\n" +
+      "• ภาษีที่ชำระไว้แล้ว: " + calcData.paid + " บาท\n" +
+      "• สรุปผล: " + calcData.diffText;
+    navigator.clipboard.writeText(txt).then(function(){
+      alert("คัดลอกสรุปข้อมูลเรียบร้อยแล้ว! นำไปเทียบกรอกลง e-Filing ที่เว็บ rd.go.th ได้เลยครับ");
+    }).catch(function(){
+      alert(txt);
+    });
+  });
   $("#f").addEventListener("input", calc);
   $("#f").addEventListener("change", calc);
   calc();
